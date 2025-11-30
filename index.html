@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO List 应用</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TODO List 应用</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索任务...">
+                <button id="clearSearch">清除搜索</button>
+            </div>
+        </header>
+
+        <div class="add-task">
+            <input type="text" id="taskTitle" placeholder="任务标题" required>
+            <textarea id="taskDescription" placeholder="任务描述（可选）"></textarea>
+            <select id="taskCategory">
+                <option value="work">工作</option>
+                <option value="study">学习</option>
+                <option value="life">生活</option>
+            </select>
+            <select id="taskPriority">
+                <option value="low">低优先级</option>
+                <option value="medium">中优先级</option>
+                <option value="high">高优先级</option>
+            </select>
+            <input type="datetime-local" id="taskDeadline">
+            <button id="addTaskBtn">添加任务</button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="pending">未完成</button>
+                <button class="filter-btn" data-filter="completed">已完成</button>
+            </div>
+            <div class="category-filters">
+                <button class="category-btn active" data-category="all">全部</button>
+                <button class="category-btn" data-category="work">工作</button>
+                <button class="category-btn" data-category="study">学习</button>
+                <button class="category-btn" data-category="life">生活</button>
+            </div>
+            <div class="sort-options">
+                <label for="sortBy">排序方式：</label>
+                <select id="sortBy">
+                    <option value="created">创建时间</option>
+                    <option value="deadline">截止日期</option>
+                    <option value="priority">优先级</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="task-list" id="taskList">
+            <!-- 任务列表将在这里动态生成 -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

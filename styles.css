@@ -32,6 +32,7 @@ body {
     background: linear-gradient(135deg, var(--macaron-pink-light) 0%, var(--macaron-lavender-light) 50%, var(--macaron-mint-light) 100%);
     min-height: 100vh;
     transition: background 0.5s ease;
+    overflow-y: scroll; /* 始终显示垂直滚动条，防止布局偏移 */
 }
 
 .container {
@@ -906,3 +907,7 @@ h1:hover {
 ## 🎨 下拉列表UI优化说明：
 
 ### **原**
+
+```
+
+## 🔧 问题原因分析：

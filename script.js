@@ -24,6 +24,9 @@ class TodoApp {
         this.initializeElements();
         this.bindEvents();
         this.renderTasks();
+        
+        // 添加实时倒计时更新
+        this.startCountdownTimer();
     }
 
     initializeElements() {
@@ -228,7 +231,7 @@ class TodoApp {
                 <div class="task-content">
                     <div class="task-title">
                         ${task.title}
-                        ${task.deadline ? `<span class="deadline-badge">${this.formatDeadline(task.deadline)}</span>` : ''}
+                        ${task.deadline ? this.formatDeadline(task.deadline) : ''}
                     </div>
                     ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                     <div class="task-meta">
@@ -255,17 +258,62 @@ class TodoApp {
         const now = new Date();
         const deadlineDate = new Date(deadline);
         const diffTime = deadlineDate - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (diffDays < 0) {
-            return `已过期 ${Math.abs(diffDays)} 天`;
-        } else if (diffDays === 0) {
-            return '今天到期';
-        } else if (diffDays === 1) {
-            return '明天到期';
+        // 精确计算时间差
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        
+        let badgeClass = 'deadline-badge';
+        let displayText = '';
+        
+        if (diffMinutes < 0) {
+            // 已过期
+            badgeClass += ' expired';
+            const overdueDays = Math.abs(Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+            const overdueHours = Math.abs(Math.ceil(diffTime / (1000 * 60 * 60)));
+            const overdueMinutes = Math.abs(Math.ceil(diffTime / (1000 * 60)));
+            
+            if (overdueDays > 1) {
+                displayText = `已过期 ${overdueDays} 天`;
+            } else if (overdueHours > 1) {
+                displayText = `已过期 ${overdueHours} 小时`;
+            } else {
+                displayText = `已过期 ${overdueMinutes} 分钟`;
+            }
+        } else if (diffMinutes <= 60) {
+            // 1小时内到期 - 红色闪烁
+            badgeClass += ' urgent';
+            if (diffMinutes === 0) {
+                displayText = '即将到期';
+            } else if (diffMinutes === 1) {
+                displayText = '1 分钟后到期';
+            } else if (diffMinutes < 60) {
+                displayText = `${diffMinutes} 分钟后到期`;
+            } else {
+                displayText = '1 小时内到期';
+            }
+        } else if (diffHours < 24) {
+            // 24小时内到期 - 普通蓝色
+            if (diffHours === 1) {
+                displayText = '1 小时后到期';
+            } else {
+                displayText = `${diffHours} 小时后到期`;
+            }
         } else {
-            return `${diffDays} 天后到期`;
+            // 多天后到期
+            if (diffDays === 1) {
+                displayText = '明天到期';
+            } else if (diffDays <= 7) {
+                displayText = `${diffDays} 天后到期`;
+            } else {
+                // 显示具体日期
+                const options = { month: 'short', day: 'numeric' };
+                displayText = deadlineDate.toLocaleDateString('zh-CN', options) + ' 到期';
+            }
         }
+        
+        return `<span class="${badgeClass}">${displayText}</span>`;
     }
 
     getCategoryName(category) {
@@ -293,6 +341,35 @@ class TodoApp {
     loadTasks() {
         const saved = localStorage.getItem('todoTasks');
         return saved ? JSON.parse(saved) : [];
+    }
+
+    startCountdownTimer() {
+        // 每分钟更新一次倒计时显示
+        this.countdownInterval = setInterval(() => {
+            this.updateCountdowns();
+        }, 60000); // 60秒 = 1分钟
+    }
+    
+    updateCountdowns() {
+        // 只更新有截止日期的任务的倒计时
+        const taskItems = document.querySelectorAll('.task-item');
+        taskItems.forEach(item => {
+            const taskId = item.dataset.id;
+            const task = this.tasks.find(t => t.id === taskId);
+            if (task && task.deadline) {
+                const deadlineBadge = item.querySelector('.deadline-badge');
+                if (deadlineBadge) {
+                    deadlineBadge.outerHTML = this.formatDeadline(task.deadline);
+                }
+            }
+        });
+    }
+    
+    // 在应用销毁时清理定时器
+    destroy() {
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
     }
 }
 

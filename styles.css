@@ -305,6 +305,56 @@ h1 {
     margin-bottom: 10px;
 }
 
+.deadline-input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.deadline-input label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+}
+
+.deadline-badge {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 10px;
+    box-shadow: 0 2px 4px rgba(116, 185, 255, 0.3);
+}
+
+.deadline-badge.urgent {
+    background: linear-gradient(135deg, #ff7675 0%, #ff4757 100%);
+    animation: urgent-pulse 1s infinite;
+}
+
+.deadline-badge.expired {
+    background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+    color: white;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes urgent-pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;
@@ -573,7 +623,7 @@ class TodoApp {
                 <div class="task-content">
                     <div class="task-title">
                         ${task.title}
-                        ${task.deadline ? `<span class="deadline-badge">${this.formatDeadline(task.deadline)}</span>` : ''}
+                        ${task.deadline ? `<span class="deadline-badge ${this.getDeadlineClass(task.deadline)}">${this.formatDeadline(task.deadline)}</span>` : ''}
                     </div>
                     ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                     <div class="task-meta">
@@ -611,6 +661,21 @@ class TodoApp {
         } else {
             return `${diffDays} 天后到期`;
         }
+    }
+
+    getDeadlineClass(deadline) {
+        if (!deadline) return '';
+        const now = new Date();
+        const deadlineDate = new Date(deadline);
+        const diffTime = deadlineDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return 'expired';
+        } else if (diffDays <= 3) { // 3天内到期
+            return 'urgent';
+        }
+        return '';
     }
 
     getCategoryName(category) {
